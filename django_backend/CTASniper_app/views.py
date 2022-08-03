@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.core import serializers
 from django.contrib.auth import authenticate, login, logout
 from .models import AppUser as User
@@ -27,8 +27,8 @@ def sign_up(request):
 def log_in(request):
     email = request.data['email']
     password = request.data['password']
+
     user = authenticate(username=email, password=password, email=email)
-    print(f'>>>>>>>>>>>>>>>>>>>>user? {user.email} {user.password}')
 
     if user is not None:
         if user.is_active:
@@ -49,8 +49,8 @@ def log_in(request):
 
 @api_view(['POST'])
 def log_out(request):
-    logout(request)
-    return JsonResponse({ 'success': True })
+    logout(request) 
+    return HttpResponse('log_out: logged you out')
 
 @api_view(['GET'])
 def who_am_i(request):
