@@ -9,30 +9,36 @@ export default function MapCard(props) {
   const [placeCoords, setPlaceCoords] = useState({});
   //just a single object now, needs to be a list of objects later
   const [stationCoords, setStationCoords] = useState({});
-  const [eta, setETA] = useState('Click for next ETA');
+  const [countdown, setCountdown] = useState('Click for next ETA');
+  const [lastETA, setLastETA] = useState(0)
   const [walkTime, setWalkTime] = useState(0);
   //const [stationsList, setStationsList] = useState({});
   //const [place, setPlace] = useState('');
   
+  // query train data api every 5s, check if newArrivalObj changed
+  // if eta from API is more than 15s over or under, adjust ETA countdown by difference
+  // then, continue 1s countdown as usual
+
   const updateArrival = async() => {
     updateStations();
     const response = await axios.get('/get_train_data')
     console.log('train data:', response.data)
     let newArrival = response.data.ctatt.eta[2].arrT;
+    console.log(newArrival);
     console.log('updating arrival:', newArrival)
     let now = new Date(Date.now())
     let newArrivalObj = new Date(newArrival);
     console.log('ETA (sec): ', (newArrivalObj - now)/1000) 
-    let eta = Math.floor((newArrivalObj - now)/1000);
+    let countdown = Math.floor((newArrivalObj - now)/1000);
+    //todo: compare last eta against new eta for time difference
+    setLastETA(countdown);
+
+    //begin or continue countingdown eta
     setInterval(function(){
-      eta = eta - 1; 
-      setETA(eta);
-      console.log('eta:', eta);
-      //      console.log('walkTime(from updateArrival):', walkTime);
+      setCountdown(countdown--);
     }, 1000);
   }
 
-  //query api, if newArrivalObj changed, update
 
   //migiht have to use a useEffect hook that synchronizes countdown timer to
   //changing state of newArrivalObj - now
@@ -72,17 +78,24 @@ const updateStations = async() => {
     .then((response) => {
       let walkTime = response.data.routes[0].legs[0].duration.value;
       setWalkTime(walkTime);
-      console.log('Google walk time (sec):', response.data.routes[0].legs[0].duration.value)
-    }).then(() => {
+      //console.log('Google walk time (sec):', response.data.routes[0].legs[0].duration.value)
+    })
+  }
+
+  //set to true, if walktime and eta equal useRef to set it back to false
+  useEffect(() => {
+    console.log('eta inside useEffect', countdown);
+
       setInterval(() => {
-        console.log('eta (from calcWalk()):', eta);
-        console.log('walk time (from calculateWalk):', walkTime);
-        if(eta === walkTime) {
+        //console.log('eta (from calcWalk()):', countdown);
+        //console.log('walk time (from calculateWalk):', walkTime);
+        if(countdown === (walkTime + 60)) {
           console.log('HEAD OUT!');
         }
       }, 5000);
-    });
-  }
+  }, [walkTime, countdown])
+
+  console.log('Nhung walk time', walkTime)
   // use stations api
   // save fav place to db
   // update place results below
@@ -101,7 +114,7 @@ const updateStations = async() => {
           </div>
           <div>
             <button onClick={ updateArrival } > 
-              ETA: {eta} 
+              ETA: {countdown} 
             </button>
           </div>
           <div>
@@ -111,6 +124,7 @@ const updateStations = async() => {
             </button>
           </div>
           <hr />
+          {  }
         </Card.Body>
       </Card>
     {/*
