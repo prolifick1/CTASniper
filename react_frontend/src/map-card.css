@@ -1,0 +1,63 @@
+
+.card-container {
+  height:70%;
+  position: absolute;
+  top: 20%;
+  z-index: 9;
+  width: 25em;
+  max-height: 45em; 
+ /* 
+  overflow: hidden;
+  background-color: transparent;
+  width: 100%;
+  height: 60%;
+  top: 13%;
+  transition: all 0.25s;
+  border-radius:0 !important;
+*/
+}
+
+.map-card .card-body.closed {
+ /*   top: 100%;
+    height: 8.1rem;
+    margin-top: -8.1rem;
+*/
+}
+
+.map-card {
+   height: 60vh;
+}
+
+.map-card .map-container {
+  height:100%;
+  /*
+  overflow:hidden;
+  padding-bottom:56.25%;
+  position:relative;
+  height:0;
+  */
+}
+
+#data-harvester {
+  max-width: 25rem;
+  height: 100%;
+}
+
+/*
+.map-card .button .btn-floating  {
+ margin-top: -2rem;
+}
+.map-card .living-coral {
+  background-color: #FA7268;
+}
+.map-card .living-coral-text {
+  color: #FA7268;
+}
+.map-card .table th {
+ width: 2rem;
+}
+.map-card .pt-3-5 {
+  padding-top: 1.25rem;
+}
+
+*/
