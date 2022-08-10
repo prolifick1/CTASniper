@@ -16,8 +16,6 @@ import MapCard from './components/MapCard'
 
 
 const submitLoginForm = function(event){
-  // this isn't actually necessary, since this isn't in a form. 
-  // but if it WAS a form, we'd need to prevent default.
   event.preventDefault()
   axios.post('/login', {email: 'jeff@amazon.com', password:'dragons'}).then((response)=>{
     console.log('response from server: ', response)
@@ -26,16 +24,12 @@ const submitLoginForm = function(event){
 }
 
 const submitSignupForm = function(event){
-  // this isn't actually necessary, since this isn't in a form. but if it WAS 
-  // a form, we'd need to prevent default.
   event.preventDefault()
   axios.post('/signup', {email: 'jeff@amazon.com', password:'dragons'}).then((response)=>{
     console.log('response from server: ', response)
   })
 }
 const logOut = function(event){
-  // this isn't actually necessary, since this isn't in a form. but if it WAS 
-  // a form, we'd need to prevent default.
   event.preventDefault()
   axios.post('/logout').then((response)=>{
     console.log('response from server: ', response)
@@ -133,6 +127,7 @@ function BasicExample({user}) {
   useEffect(()=>{
     whoAmI()
   }, [])
+
   return (
     <Navbar bg="light" expand="lg">
       <Container>

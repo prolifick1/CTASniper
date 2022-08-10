@@ -1,38 +1,36 @@
 import React from "react";
 import Card from 'react-bootstrap/Card'
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCoffee, faPersonWalking } from '@fortawesome/free-solid-svg-icons'
 import axios from 'axios';
 
-
-
-
 export default function MapCard(props) {
   const [placeCoords, setPlaceCoords] = useState({});
-  //just a single object now, will be a list of objects later!
-  const [stationsList, setStationsList] = useState({});
+  //just a single object now, needs to be a list of objects later
   const [stationCoords, setStationCoords] = useState({});
-  const [arrival, setArrival] = useState('Click for next arrival');
-  const [place, setPlace] = useState('');
+  const [eta, setETA] = useState('Click for next ETA');
+  const [walkTime, setWalkTime] = useState(0);
+  //const [stationsList, setStationsList] = useState({});
+  //const [place, setPlace] = useState('');
   
-  {/* const [isClosed, setClosed] = useState('closed')
-    const handleToggle = () => {
-      setClosed(!isClosed);
-    } 
-  */}
   const updateArrival = async() => {
     updateStations();
     const response = await axios.get('/get_train_data')
     console.log('train data:', response.data)
-    let newArrival = response.data.ctatt.eta[0].arrT;
-    setArrival(newArrival);
+    let newArrival = response.data.ctatt.eta[2].arrT;
     console.log('updating arrival:', newArrival)
     let now = new Date(Date.now())
     let newArrivalObj = new Date(newArrival);
     console.log('ETA (sec): ', (newArrivalObj - now)/1000) 
+    let eta = Math.floor((newArrivalObj - now)/1000);
+    setInterval(function(){
+      eta = eta - 1; 
+      setETA(eta);
+      console.log('eta:', eta);
+      //      console.log('walkTime(from updateArrival):', walkTime);
+    }, 1000);
   }
-
 
   //query api, if newArrivalObj changed, update
 
@@ -60,7 +58,7 @@ const updateStations = async() => {
     await axios.get('/get_stations').then((response) => {
         console.log('got stations:', response.data);
         console.log('station: ', {lat: response.data[26].location.latitude, lng: response.data[26].location.longitude})
-        setStationsList({lat: response.data[26].location.latitude, lng: response.data[26].location.longitude});
+      //setStationsList({lat: response.data[26].location.latitude, lng: response.data[26].location.longitude});
         setStationCoords({lat: response.data[26].location.latitude, lng: response.data[26].location.longitude});
      })
   } catch {
@@ -72,9 +70,18 @@ const updateStations = async() => {
     console.log('station: ', destinationCoords);
     axios.get('/calculate_walk', { params: { originCoords: originCoords, destinationCoords: destinationCoords } })
     .then((response) => {
-      console.log(response)
+      let walkTime = response.data.routes[0].legs[0].duration.value;
+      setWalkTime(walkTime);
       console.log('Google walk time (sec):', response.data.routes[0].legs[0].duration.value)
-    })
+    }).then(() => {
+      setInterval(() => {
+        console.log('eta (from calcWalk()):', eta);
+        console.log('walk time (from calculateWalk):', walkTime);
+        if(eta === walkTime) {
+          console.log('HEAD OUT!');
+        }
+      }, 5000);
+    });
   }
   // use stations api
   // save fav place to db
@@ -94,12 +101,12 @@ const updateStations = async() => {
           </div>
           <div>
             <button onClick={ updateArrival } > 
-              ETA: {arrival} 
+              ETA: {eta} 
             </button>
           </div>
           <div>
             <p>Calculate Walk Time</p>
-            <button onClick={ () => calculateWalk(stationCoords, placeCoords) }>
+            <button onClick={ () => calculateWalk(placeCoords, stationCoords) }>
               calculate walk time
             </button>
           </div>
