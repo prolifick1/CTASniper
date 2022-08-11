@@ -12,6 +12,7 @@ export default function MapCard(props) {
   const [countdown, setCountdown] = useState('Click for next ETA');
   const [lastETA, setLastETA] = useState(0)
   const [walkTime, setWalkTime] = useState(0);
+  const [isWalkTimeSet, setIsWalkTimeSet] = useState(false);
   //const [stationsList, setStationsList] = useState({});
   //const [place, setPlace] = useState('');
   
@@ -30,12 +31,17 @@ export default function MapCard(props) {
     let newArrivalObj = new Date(newArrival);
     console.log('ETA (sec): ', (newArrivalObj - now)/1000) 
     let countdown = Math.floor((newArrivalObj - now)/1000);
-    //todo: compare last eta against new eta for time difference
     setLastETA(countdown);
+    //todo: compare last eta against new eta for time difference
 
     //begin or continue countingdown eta
     setInterval(function(){
       setCountdown(countdown--);
+      if(isWalkTimeSet) {
+        if(countdown === (walkTime + 120)) {
+          console.log('HEAD OUT!');
+        }
+      }
     }, 1000);
   }
 
@@ -78,22 +84,23 @@ const updateStations = async() => {
     .then((response) => {
       let walkTime = response.data.routes[0].legs[0].duration.value;
       setWalkTime(walkTime);
+      setIsWalkTimeSet(true);
       //console.log('Google walk time (sec):', response.data.routes[0].legs[0].duration.value)
     })
   }
 
   //set to true, if walktime and eta equal useRef to set it back to false
-  useEffect(() => {
-    console.log('eta inside useEffect', countdown);
-
-      setInterval(() => {
-        //console.log('eta (from calcWalk()):', countdown);
-        //console.log('walk time (from calculateWalk):', walkTime);
-        if(countdown === (walkTime + 60)) {
-          console.log('HEAD OUT!');
-        }
-      }, 5000);
-  }, [walkTime, countdown])
+  //  useEffect(() => {
+  //    console.log('eta inside useEffect', countdown);
+  //
+  //      setInterval(() => {
+  //        //console.log('eta (from calcWalk()):', countdown);
+  //        //console.log('walk time (from calculateWalk):', walkTime);
+  //        if(countdown === (walkTime + 60)) {
+  //          console.log('HEAD OUT!');
+  //        }
+  //      }, 5000);
+  //  }, [walkTime, countdown])
 
   console.log('Nhung walk time', walkTime)
   // use stations api
